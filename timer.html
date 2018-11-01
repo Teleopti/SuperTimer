@@ -1,0 +1,66 @@
+<html>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.js"></script>
+<body>
+
+<div id="timer" v-bind:style="{backgroundColor: color}">
+    <button @click="reset">Reset</button>
+    <button @click="start">Start</button>
+    <button @click="pause">Pause</button>
+    <div style="font-size: 200px; vertical-align: center; text-align: center;">
+        {{time}}
+    </div>
+</div>
+
+</body>
+
+<script>
+
+    var vm = new Vue({
+        el: '#timer',
+        data: {
+            time: 'Hack away!',
+            timerSeconds: 10 * 60
+        },
+        created: function () {
+            this.reset();
+            this.start();
+        },
+        methods: {
+            start: function () {
+                this.lastTick = moment();
+                if (!this.interval)
+                    this.interval = setInterval(this.countdown, 100);
+            },
+            reset: function () {
+                this.millisecondsLeft = this.timerSeconds * 1000;
+            },
+            pause: function () {
+                clearInterval(this.interval);
+                this.interval = null;
+            },
+            countdown: function () {
+                var now = moment();
+                var change = now.diff(this.lastTick);
+                this.millisecondsLeft = this.millisecondsLeft - change;
+                if (this.millisecondsLeft <= 0) {
+                    this.time = 'Time is up!';
+                    this.color = '#ff0000';
+                } else {
+                    this.time = moment.utc(this.millisecondsLeft).format("mm:ss");
+                    this.color = '#66aa66';
+                }
+                this.lastTick = moment();
+            }
+
+        },
+        beforeDestroy: function () {
+            this.pause();
+        }
+    });
+
+
+</script>
+
+
+</html>
