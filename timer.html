@@ -19,7 +19,6 @@
         }
         .time {
             color: #0b054c;
-            font-size: 500px; 
             vertical-align: center; 
             text-align: center; 
             height: 100%;
@@ -39,7 +38,7 @@
         <button class="button" @click="start">Start</button>
         <button class="button" @click="pause">Pause</button>
     </div>
-    <div class="time">
+    <div class="time" v-bind:style="{fontSize: fontSize}">
         {{time}}
     </div>
 </div>
@@ -78,9 +77,11 @@
                 if (this.millisecondsLeft <= 0) {
                     this.time = 'Time is up!';
                     this.color = '#ff0000';
+                    this.fontSize = '300px';
                 } else {
                     this.time = moment.utc(this.millisecondsLeft).format("mm:ss");
                     this.color = '#66aa66';
+                    this.fontSize = '500px';
                 }
                 this.lastTick = moment();
             }
