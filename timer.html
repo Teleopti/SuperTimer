@@ -2,7 +2,7 @@
 <head>
     <LINK href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.css" rel="stylesheet" type="text/css">
     <style>
-        
+
         .actions {
             padding: 10px;
             float: right;
@@ -58,7 +58,7 @@
         <button class="button" @click="pause">Pause</button>
     </div>
     <div class="names">
-        <input class="name" v-for="name in names" v-model="name" v-bind:style="{backgroundColor: nameColor}"/>
+        <input v-for="name in names" class="name" v-model="name.value" v-bind:style="{backgroundColor: nameColor}"/>
     </div>
     <div class="time" v-bind:style="{fontSize: fontSize}">
         {{time}}
@@ -74,11 +74,19 @@
         data: {
             time: 'Hack away!',
             timerSeconds: 10 * 60,
-            names: ['Alina', 'Per', 'Mathias', '', '']
+            names: JSON.parse(localStorage.getItem("names")) || [{value: 'Alina'}, {value: 'Per'}, {value: 'Mathias'}, {value: ''}, {value: ''}]
         },
         created: function () {
             this.reset();
             this.start();
+        },
+        watch: {
+            names: {
+                handler: function (val, oldVal) {
+                    localStorage.names = JSON.stringify(val);
+                },
+                deep: true
+            }
         },
         methods: {
             start: function () {
