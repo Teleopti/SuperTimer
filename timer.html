@@ -1,10 +1,13 @@
 <html>
-<header>
+<head>
+    <LINK href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.css" rel="stylesheet" type="text/css">
     <style>
+        
         .actions {
             padding: 10px;
             float: right;
         }
+
         .button {
             background-color: #0b054c;
             border: none;
@@ -13,22 +16,38 @@
             text-align: center;
             text-decoration: none;
             display: inline-block;
-            font-size: 20px;
+            font-size: 30px;
             margin: 4px 2px;
             cursor: pointer;
         }
+
         .time {
             color: #0b054c;
-            vertical-align: center; 
-            text-align: center; 
+            vertical-align: center;
+            text-align: center;
             height: 100%;
             padding: 220px 0px;
+        }
+
+        .names {
+            position: absolute;
+            padding: 10px;
+        }
+
+        .name {
+            padding: 15px 32px;
+            margin: 4px 2px 8px 2px;
+            border: 0;
+            font-size: 30px;
+            display: block;
+            color: #0b054c;
+            max-width: 180px;
         }
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.js"></script>
-</header>
+</head>
 
 <body>
 
@@ -37,6 +56,9 @@
         <button class="button" @click="reset">Reset</button>
         <button class="button" @click="start">Start</button>
         <button class="button" @click="pause">Pause</button>
+    </div>
+    <div class="names">
+        <input class="name" v-for="name in names" v-model="name" v-bind:style="{backgroundColor: nameColor}"/>
     </div>
     <div class="time" v-bind:style="{fontSize: fontSize}">
         {{time}}
@@ -51,7 +73,8 @@
         el: '#timer',
         data: {
             time: 'Hack away!',
-            timerSeconds: 10 * 60
+            timerSeconds: 10 * 60,
+            names: ['Alina', 'Per', 'Mathias', '', '']
         },
         created: function () {
             this.reset();
@@ -77,10 +100,12 @@
                 if (this.millisecondsLeft <= 0) {
                     this.time = 'Time is up!';
                     this.color = '#ff0000';
+                    this.nameColor = '#ee0000';
                     this.fontSize = '300px';
                 } else {
                     this.time = moment.utc(this.millisecondsLeft).format("mm:ss");
                     this.color = '#66aa66';
+                    this.nameColor = '#669966';
                     this.fontSize = '500px';
                 }
                 this.lastTick = moment();
