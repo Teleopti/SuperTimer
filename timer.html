@@ -29,12 +29,12 @@
             padding: 220px 0px;
         }
 
-        .names {
+        .developers {
             position: absolute;
             padding: 10px;
         }
 
-        .name {
+        .developer {
             padding: 15px 32px;
             margin: 4px 2px 8px 2px;
             border: 0;
@@ -42,6 +42,11 @@
             display: block;
             color: #0b054c;
             max-width: 180px;
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .driver {
+            background-color: rgba(255, 255, 255, 0.3);
         }
     </style>
 
@@ -57,8 +62,13 @@
         <button class="button" @click="start">Start</button>
         <button class="button" @click="pause">Pause</button>
     </div>
-    <div class="names">
-        <input v-for="name in names" class="name" v-model="name.value" v-bind:style="{backgroundColor: nameColor}"/>
+    <div class="developers">
+        <input v-for="developer in developers"
+               class="developer"
+               v-model="developer.name"
+               v-bind:class="{ driver: developer.name === $root.driver }"
+               @click="selectDriver(developer)"
+        />
     </div>
     <div class="time" v-bind:style="{fontSize: fontSize}">
         {{time}}
@@ -69,21 +79,44 @@
 
 <script>
 
+    function readJSONFromSessionStorage(key) {
+        try {
+            return JSON.parse(localStorage.getItem(key))
+        } catch (e) {
+            return null;
+        }
+    }
+
+    var driver = localStorage.getItem('driver');
+    var developers = readJSONFromSessionStorage("developers");
+    var defaultDevelopers = [{name: 'Kent B'}, {name: 'Robert C'}, {name: 'Martin F'}, {name: 'Woody Z'}, {name: 'Ward C'}];
+
+    console.log('got', driver);
+
     var vm = new Vue({
         el: '#timer',
         data: {
-            time: 'Hack away!',
+            time: null,
+            color: null,
+            fontSize: null,
             timerSeconds: 10 * 60,
-            names: JSON.parse(localStorage.getItem("names")) || [{value: 'Kent B'}, {value: 'Robert C'}, {value: 'Martin F'}, {value: 'Woody Z'}, {value: 'Ward C'}]
+            developers: developers || defaultDevelopers,
+            driver: driver,
         },
         created: function () {
-            this.reset();
             this.start();
+            this.reset();
         },
         watch: {
-            names: {
+            developers: {
                 handler: function (val, oldVal) {
-                    localStorage.names = JSON.stringify(val);
+                    localStorage.developers = JSON.stringify(val);
+                },
+                deep: true
+            },
+            driver: {
+                handler: function (val, oldVal) {
+                    localStorage.driver = val;
                 },
                 deep: true
             }
@@ -96,10 +129,27 @@
             },
             reset: function () {
                 this.millisecondsLeft = this.timerSeconds * 1000;
+                this.nextDriver();
             },
             pause: function () {
                 clearInterval(this.interval);
                 this.interval = null;
+            },
+            selectDriver: function (driver) {
+                this.driver = driver.name;
+            },
+            nextDriver: function () {
+                if (!this.driver)
+                    return;
+
+                var vm = this;
+                var current = this.developers.find(function (d) {
+                    return d.name === vm.driver
+                });
+                var indexOf = this.developers.indexOf(current) + 1;
+                if (indexOf > this.developers.length - 1)
+                    indexOf = 0;
+                this.driver = this.developers[indexOf].name;
             },
             countdown: function () {
                 var now = moment();
@@ -108,12 +158,10 @@
                 if (this.millisecondsLeft <= 0) {
                     this.time = 'Time is up!';
                     this.color = '#ff0000';
-                    this.nameColor = '#ee0000';
                     this.fontSize = '300px';
                 } else {
                     this.time = moment.utc(this.millisecondsLeft).format("mm:ss");
                     this.color = '#66aa66';
-                    this.nameColor = '#669966';
                     this.fontSize = '500px';
                 }
                 this.lastTick = moment();
