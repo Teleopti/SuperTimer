@@ -66,7 +66,7 @@
         <input v-for="developer in developers"
                class="developer"
                v-model="developer.name"
-               v-bind:class="{ driver: developer.name === $root.driver }"
+               v-bind:class="{ driver: isDriver(developer) }"
                @click="selectDriver(developer)"
         />
     </div>
@@ -133,21 +133,22 @@
                 clearInterval(this.interval);
                 this.interval = null;
             },
+            isDriver: function (developer) {
+                if (developer.name)
+                    return this.driver === developer.name;
+                return false;
+            },
             selectDriver: function (driver) {
                 this.driver = driver.name;
             },
             nextDriver: function () {
-                if (!this.driver)
-                    return;
-
-                var vm = this;
-                var current = this.developers.find(function (d) {
-                    return d.name === vm.driver
-                });
-                var indexOf = this.developers.indexOf(current) + 1;
-                if (indexOf > this.developers.length - 1)
-                    indexOf = 0;
-                this.driver = this.developers[indexOf].name;
+                var uniqueNames = this.developers
+                    .map(d => d.name)
+                    .filter(n => !!n)
+                    .filter((v, i, a) => a.indexOf(v) === i);
+                var nameQueue = uniqueNames.concat(uniqueNames);
+                var currentDriverIndex = uniqueNames.indexOf(this.driver);
+                this.driver = nameQueue[currentDriverIndex + 1];
             },
             countdown: function () {
                 var now = moment();
