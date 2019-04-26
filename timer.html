@@ -58,7 +58,7 @@
 
 <div id="timer" v-bind:style="{backgroundColor: color}">
     <div class="actions">
-        <button class="button" @click="reset">Reset</button>
+        <button class="button" @click="next">Next</button>
         <button class="button" @click="start">Start</button>
         <button class="button" @click="pause">Pause</button>
     </div>
@@ -103,7 +103,7 @@
         },
         created: function () {
             this.start();
-            this.reset();
+            this.next();
         },
         watch: {
             developers: {
@@ -125,7 +125,7 @@
                 if (!this.interval)
                     this.interval = setInterval(this.countdown, 100);
             },
-            reset: function () {
+            next: function () {
                 this.millisecondsLeft = this.timerSeconds * 1000;
                 this.nextDriver();
             },
