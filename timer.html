@@ -19,6 +19,7 @@
             font-size: 30px;
             margin: 4px 2px;
             cursor: pointer;
+            width: 130px;
         }
 
         .time {
@@ -59,15 +60,16 @@
 <div id="timer" v-bind:style="{backgroundColor: color}">
     <div class="actions">
         <button class="button" @click="next">Next</button>
-        <button class="button" @click="start">Start</button>
-        <button class="button" @click="pause">Pause</button>
+        <button class="button" @click="start" v-if="!started">Start</button>
+        <button class="button" @click="stop" v-if="started">Stop</button>
+
     </div>
     <div class="developers">
         <input v-for="developer in developers"
                class="developer"
                v-model="developer.name"
                v-bind:class="{ driver: isDriver(developer) }"
-               @click="selectDriver(developer)"
+               @click="selectDriver(developer); reset(); start()"
         />
     </div>
     <div class="time" v-bind:style="{fontSize: fontSize}">
@@ -100,9 +102,9 @@
             timerSeconds: 10 * 60,
             developers: developers || defaultDevelopers,
             driver: driver,
+            started: false
         },
         created: function () {
-            this.start();
             this.next();
         },
         watch: {
@@ -120,18 +122,29 @@
             }
         },
         methods: {
+            next: function () {
+                this.reset();
+                this.nextDriver();
+                this.start();
+            },            
             start: function () {
                 this.lastTick = moment();
                 if (!this.interval)
                     this.interval = setInterval(this.countdown, 100);
-            },
-            next: function () {
-                this.millisecondsLeft = this.timerSeconds * 1000;
-                this.nextDriver();
-            },
-            pause: function () {
+                if (this.timeIsUp())
+                    this.reset(); 
+                this.started = true
+            },            
+            stop: function () {
                 clearInterval(this.interval);
                 this.interval = null;
+                this.started = false;
+            },
+            reset: function() {
+                this.millisecondsLeft = this.timerSeconds * 1000; 
+            },
+            timeIsUp: function (){
+                return this.millisecondsLeft <= 0
             },
             isDriver: function (developer) {
                 if (developer.name)
@@ -154,26 +167,23 @@
                 var now = moment();
                 var change = now.diff(this.lastTick);
                 this.millisecondsLeft = this.millisecondsLeft - change;
-                if (this.millisecondsLeft <= 0) {
+                if (this.timeIsUp()) {
                     this.time = 'Time is up!';
                     this.color = '#ff0000';
                     this.fontSize = '300px';
+                    this.started = false;
                 } else {
                     this.time = moment.utc(this.millisecondsLeft).format("mm:ss");
                     this.color = '#66aa66';
                     this.fontSize = '500px';
                 }
                 this.lastTick = moment();
-            }
-
+            },
         },
         beforeDestroy: function () {
-            this.pause();
+            this.stop();
         }
     });
 
-
 </script>
-
-
 </html>
